@@ -343,7 +343,7 @@ class DetectionDataset(Dataset, HasPreprocessingParams):
         if self.input_dim is not None:
             r = min(self.input_dim[0] / img.shape[0], self.input_dim[1] / img.shape[1])
             desired_size = (int(img.shape[1] * r), int(img.shape[0] * r))
-            img = cv2.resize(src=img, dsize=desired_size, interpolation=cv2.INTER_LINEAR).astype(np.uint8)
+            img = cv2.resize(src=img, dsize=desired_size, interpolation=cv2.INTER_LINEAR).astype(np.float32)
 
         return img
 
@@ -353,7 +353,11 @@ class DetectionDataset(Dataset, HasPreprocessingParams):
         :return:            Image in BGR format, and channel last (HWC).
         """
         img_file = os.path.join(image_path)
-        img = cv2.imread(img_file)
+
+        # img = cv2.imread(img_file)
+        img = cv2.imread(img_file, cv2.IMREAD_UNCHANGED)
+        img = img.astype(np.float32) / 255.0
+        img = cv2.merge([img, img, img])
 
         if img is None:
             raise FileNotFoundError(f"{img_file} was no found. Please make sure that the dataset was" f"downloaded and that the path is correct")
